@@ -22,7 +22,7 @@ jobs:
         run: |
           cd backup
           npm install
-          npm install archiver googleapis node-fetch
+          npm install node-fetch@2 archiver
 
       - name: Run backup script
         run: |
