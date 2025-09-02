@@ -4,18 +4,21 @@ const fetch = require("node-fetch");
 const { google } = require("googleapis");
 require("dotenv").config();
 
-// ====== 🔑 Google Drive Setup ======
-const credentials = JSON.parse(fs.readFileSync("oauth_credentials.json", "utf8"));
-const token = JSON.parse(fs.readFileSync("token.json", "utf8"));
+// ====== 🔑 Google Drive Setup (ENV based, no local files) ======
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
+const FOLDER_ID = process.env.FOLDER_ID;
 
-const { client_secret, client_id, redirect_uris } = credentials.web;
-const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-oAuth2Client.setCredentials(token);
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  "https://developers.google.com/oauthplayground" // redirect URI
+);
+
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const drive = google.drive({ version: "v3", auth: oAuth2Client });
-
-// 👉 Replace with your Drive folder ID
-const FOLDER_ID = process.env.FOLDER_ID;
 
 // ====== 📦 Supabase Setup ======
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -88,7 +91,6 @@ function createZip() {
     archive.finalize();
   });
 }
-
 
 // ====== ☁️ Upload to Google Drive ======
 async function uploadToDrive(filePath, fileName) {
